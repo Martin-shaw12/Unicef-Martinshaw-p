@@ -1,0 +1,184 @@
+---
+title: "Unicef project"
+subtitle: "Care for Children"
+author: "Martin Shaw"
+date: "04/04/2024"
+format:
+  html:
+    theme: "Vapor"
+    toc: true
+execute: 
+  echo: false
+  warning: false
+  message: false
+runtime: "shiny" 
+---
+
+In an ever-evolving global landscape, the well-being of children and newborns stands as a telling indicator of a nation's developmental progress and its prioritization of future generations. The data harvested from various national surveys and studies provides a window into the lives of these young citizens, offering quantifiable metrics that reflect their health, education, and overall quality of life. The "obs_value" metric emerges as a pivotal point of reference in this context, quantifying the average number of deprivations children face as well as the rate of postnatal care for newborns—key indicators that mirror a society's capacity to nurture and sustain its youngest members.
+
+From fluctuations in healthcare service delivery to the average number of adversities faced by children, particularly females, these figures paint a detailed portrait of the international stage. They unveil the stark disparities and varied challenges across different regions and time periods, shedding light on the myriad factors that sculpt these outcomes. This introduction sets the stage for a deeper examination of the data at hand, guiding us through a nuanced understanding of how socio-economic factors, policy decisions, and infrastructural adequacy coalesce to influence the delicate early stages of life around the globe.
+
+
+
+## Third World Countries Maps 
+```{r}
+#| label: setup
+#| include: false 
+
+#libraries
+library(tidyverse)
+library(plotly)
+
+#data
+unicef_indicator_1 <- read_csv("unicef_indicator_1.csv")
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+
+#transformations 
+world_map <- map_data("world")
+merged_data1 <- merge(world_map, unicef_indicator_1, by.x="region", by.y="country", all.x=TRUE)
+merged_data2 <- merge(world_map, unicef_indicator_2, by.x="region", by.y="country", all.x=TRUE)
+```
+
+```{r}
+#| fig-cap: The obs value within this dataset encapsulates the mean count of hardships encountered by children, segmented by demographics such as gender and nationality, over specific annual intervals. These adversities span a spectrum of critical areas including nutritional health, educational access, healthcare availability, and overall living conditions. Influenced by a tapestry of determinants—ranging from socio-economic landscapes and child-centric policy frameworks to societal conventions and infrastructural provisions—this metric serves as a barometer for childrens quality of life. Notably, enhancements in economic stability, educational outreach, and healthcare infrastructures can lead to a diminution in the average adversity tally (a lower obs value), mirroring strides in enhancing juvenile welfare. In contrast, the escalation of adversities, as denoted by a rising obs value, often correlates with economic regressions, sociopolitical unrest, or ecological calamities, highlighting areas of concern. This dataset, therefore, offers a panoramic view of child welfare evolution across geographies and through time, delineating the ebb and flow of child deprivation on a global scale.
+
+world_map <- map_data("world")
+merged_data1 <- merge(world_map, unicef_indicator_1, by.x="region", by.y="country", all.x=TRUE)
+merged_data2 <- merge(world_map, unicef_indicator_2, by.x="region", by.y="country", all.x=TRUE)
+
+ggplot() +
+  geom_polygon(data = merged_data1, aes(x = long, y = lat, group = group, fill = obs_value), color = "white") +
+  scale_fill_continuous(low = "blue", high = "red") +
+  labs(title = "Average number of deprivations for children") +
+  theme_minimal()
+```
+```{r}
+#| fig-cap: The obs value metric reflects the proportion of newborns receiving postnatal care within a specified timeframe, offering a vital gauge of a nations commitment to early-life health. Its shaped by a mosaic of elements, including the robustness of healthcare frameworks, policy-driven maternal and infant well-being initiatives, ingrained cultural norms, and the broader economic landscape. Enhanced healthcare outreach and heightened societal awareness can significantly uplift this metric, signaling a positive trajectory in newborn care practices. On the flip side, economic constraints and limited healthcare accessibility can impede progress, underscoring the metrics sensitivity to a range of influencing factors. This data encapsulates a narrative of evolving healthcare practices across different locales and temporal snapshots, charting the course of postnatal care advancements and challenge.
+
+ggplot() +
+  geom_polygon(data = merged_data2, aes(x = long, y = lat, group = group, fill = obs_value), color = "white") +
+  scale_fill_continuous(low = "green", high = "yellow") +
+  labs(title = "Postnatal care for newborns") +
+  theme_minimal()
+```
+
+
+
+## 2020 Postnatal care results in third world countires 
+```{r}
+#libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(ggplot2)
+
+#data 
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+```
+
+```{r}
+#| fig-cap: As we can see from this graph its very clusterd and busy and hard to read so below you will see a smaller and more controlled graph, that show a broad range of countires. 
+
+
+
+ggplot(unicef_indicator_2, aes(x=reorder(country, obs_value), y=obs_value)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Postnatal Care for Newborns in 2020",
+       x="Country", 
+       y="Percentage Postnatal Care")
+
+```
+
+```{r}
+#| fig-cap: The bar graph Postnatal Care for Newborns in 2020 illustrates the stark contrasts in postnatal care coverage among a selection of countries. Its evident that the percentage of postnatal care varies widely, reflecting disparities in healthcare delivery and access around the world. Starting with Chad, the graph indicates a very low level of postnatal care, suggesting significant gaps in healthcare provision for newborns. Similarly, Kenya exhibits low postnatal care coverage, underscoring a need for healthcare system improvements in these regions. In contrast, Benin and Malawi stand out with their relatively high percentages of postnatal care. These figures suggest more robust healthcare systems in place for postnatal care, highlighting the successes in these countries healthcare policies and implementation. The bar for Belarus indicates an exceptionally high level of postnatal care, possibly surpassing one hundred percent. This could be due to reporting errors, double-counting, or the inclusion of multiple postnatal visits for a single newborn in the data. Its an anomaly that warrants further investigation to ensure accurate representation. Iraq, while not as high as Benin, Malawi, or the unlikely figure for Belarus, still shows a significant percentage of postnatal care coverage, indicating moderate success in reaching newborns with healthcare services after birth. Indonesia shows a lower percentage than Malawi and Benin but higher than Chad and Kenya, placing it in the middle range of the countries represented on the graph. This visual representation serves as a call to action for the international community and national health systems to analyze the underlying causes of such disparities and work towards a more equitable distribution of postnatal healthcare services.
+
+selected_countries <- c("Belarus","Benin","Chad","Indonesia","Iraq","Kenya","Malawi")
+filtered_data <- unicef_indicator_2[unicef_indicator_2$country %in% selected_countries, ]
+ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+  geom_bar(stat="identity", fill="pink") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Postnatal Care for Newborns in 2020",
+       x="Country", 
+       y="Percentage Postnatal Care")
+
+```
+
+
+## Deprivations of Children from 2012 to 2018
+```{r}
+#libraries
+library(tidyverse)
+library(ggplot2)
+
+#data 
+unicef_indicator_1 <- read_csv("unicef_indicator_1.csv")
+```
+
+```{r}
+#| fig-cap: This scatterplot with a linear regression line represents a dataset over a time period from approximately 2012 to 2018. The data points, represented by the black dots, indicate the observed values for a particular variable across this time. The regression line in blue indicates the overall trend of the data across the time period. The slope of the line appears to be slightly negative suggesting a small decrease in the observation value over time. However the slope is quite shallow indicating that the change is not pronounced. There is a noticeable spread of data points around the regression line, which suggests some variance in the observation values from year to year. The distribution of points does not show a clear pattern of increasing or decreasing variance over time; the spread seems relatively constant. Its important to note that while the regression line suggests a trend, it does not imply causation. Moreover, the scatterplot does not indicate any outlier removal or adjustments for potential confounding variables that may affect the observation value.This plot provides a simplified visual summary of the datas trend over time, but further statistical analysis would be required to draw more concrete conclusions about the nature of the data and the significance of the observed trend.
+
+ggplot(unicef_indicator_1, aes(x = time_period, y = obs_value)) +
+  geom_point() +  # Add points for the scatterplot
+  geom_smooth(method = "lm", se = FALSE) +  # Add the linear regression line
+  labs(title = "Scatterplot with Linear Regression Line",
+       x = "Time Period",
+       y = "Observation Value") +
+  theme_minimal()
+```
+
+
+
+
+## Data on Deprivations of Females
+```{r}
+#library
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+#data 
+unicef_indicator_1 <- read_csv("unicef_indicator_1.csv")
+```
+```{r}
+#| fig-cap: Just like above when we look at all the countries at once it becomes to much to comprehend so below a filtered graph is shown.
+
+ggplot(unicef_indicator_1, aes(x = time_period, y = obs_value, group = country, color = country)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "           Average Number of Deprivations for Females",
+       x = "Year",
+       y = "Average Number of Deprivations (%)") +
+  theme(legend.title = element_blank(),
+        legend.position = "right") +
+  scale_color_discrete(name = "Country")
+```
+```{r}
+#| fig-cap: The data on deprivations for females across various countries reveals a spectrum of average deprivations they face. The mean deprivation score among the surveyed group is approximately 1.69, indicating that on average, females experience more than one deprivation in areas such as health, education, and living standards.The country with the lowest observed average number of deprivations for females is the Maldives, with a score of approximately 1.07. This suggests that, relative to other countries in this dataset, the Maldives has fewer barriers in key developmental areas for females.On the other hand, Ethiopia records the highest average number of deprivations for females, with a score of about 2.62. This indicates that females in Ethiopia, on average, face multiple deprivations that may significantly affect their quality of life and development. These figures underline the variability in gender-specific challenges faced by females across different geographic and socio-economic contexts. While some nations exhibit relatively lower levels of deprivation, indicating better conditions for female development, others present a landscape where females endure multiple deprivations, highlighting areas where focused interventions may be required to improve female well-being and equity.
+
+selected_countries <- c("Kyrgyzstan", "Liberia", "Peru","Yemen","Togo","Thailand","Sierra Leone","Paraguay","Nepal","Myanmar","Lesotho","Mexico","Guinea")
+filtered_data <- subset(unicef_indicator_1, country %in% selected_countries)
+ggplot(filtered_data, aes(x = time_period, y = obs_value, group = country, color = country)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "           Average Number of Deprivations for Females 2012 - 2018",
+       x = "Year",
+       y = "Average Number of Deprivations (%)") +
+  theme(legend.title = element_blank(),
+        legend.position = "right") +
+  scale_color_discrete(name = "Country")
+```
+
+## Conclusion 
+
+In conclusion, the datasets presented offer a multifaceted perspective on the well-being of children and newborns across the globe. From the aggregated obs values, we glean insights into the intricacies of child deprivations and the effectiveness of postnatal care systems. The data portrays not only the prevalence of adversities and their impact on children segmented by demographics and gender but also the global efforts to enhance early-life healthcare. The figures tell stories of both triumph and challenge: the impressive strides made by some nations in nurturing the health of newborns contrast sharply with the acute needs observed in others. The overarching narrative underscores the importance of sustained and inclusive improvements in economic conditions, education systems, and healthcare frameworks to mitigate the hardships faced by children, particularly females, in diverse socio-economic settings.
+
+As we look at the progression over time, the subtle yet telling trends marked by the linear regression analysis call for careful consideration. While no single factor dictates the observed trends, the interplay of socio-economic and political forces is evident. The continuity of data over years encapsulates not just the ebb and flow of deprivations and healthcare quality but also the resiliency and responsiveness of systems to the needs of the young. The journey towards reducing disparities and improving life outcomes for children and newborns is ongoing, and these datasets serve as crucial beacons, guiding policy, advocacy, and intervention towards a more equitable future.
+
+
+
+
+

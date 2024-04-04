@@ -1,0 +1,129 @@
+---
+title: "Unicef"
+subtitle: "Postnatal Care for Newborns"
+author: "Martin Shaw"
+date: "04/04/2024"
+format:
+  html:
+    theme: minty
+    toc: true
+execute: 
+  echo: false
+  warning: false
+  message: false
+runtime: "shiny" 
+---
+```{r}
+#| label: setup 
+#| include: false
+
+#libraries 
+library(tidyverse)
+library(plotly)
+
+#data
+unicef_indicator_1 <- read_csv("unicef_indicator_1.csv")
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+
+#transformations 
+world_map <- map_data("world")
+merged_data1 <- merge(world_map, unicef_indicator_1, by.x="region", by.y="country", all.x=TRUE)
+merged_data2 <- merge(world_map, unicef_indicator_2, by.x="region", by.y="country", all.x=TRUE)
+```
+
+```{r}
+world_map <- map_data("world")
+merged_data1 <- merge(world_map, unicef_indicator_1, by.x="region", by.y="country", all.x=TRUE)
+merged_data2 <- merge(world_map, unicef_indicator_2, by.x="region", by.y="country", all.x=TRUE)
+
+ggplot() +
+  geom_polygon(data = merged_data1, aes(x = long, y = lat, group = group, fill = obs_value), color = "white") +
+  scale_fill_continuous(low = "blue", high = "red") +
+  labs(title = "Map Diagram for Indicator 1") +
+  theme_minimal()
+```
+```{r}
+#| figcap: "this map is gay"
+
+ggplot() +
+  geom_polygon(data = merged_data2, aes(x = long, y = lat, group = group, fill = obs_value), color = "white") +
+  scale_fill_continuous(low = "green", high = "yellow") +
+  labs(title = "Map Diagram for Indicator 2") +
+  theme_minimal()
+```
+
+```{r}
+#libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(ggplot2)
+
+#data 
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+```
+```{r}
+#| fig-cap: "this is gay"
+ggplot(unicef_indicator_2, aes(x=reorder(country, obs_value), y=obs_value)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Postnatal Care for Newborns in 2020",
+       x="Country", 
+       y="Percentage of Newborns Receiving Postnatal Care")
+
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country))
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+```
+
+```{r}
+#libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(ggplot2)
+
+#data
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+```
+
+```{r}
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country))
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$barplot <- renderPlot({
+    filtered_data <- subset(unicef_indicator_2, country == input$country)          
+    ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+      geom_bar(stat="identity", fill="steelblue") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title="Postnatal Care for Newborns",
+           x="Country", 
+           y="Percentage of Newborns Receiving Postnatal Care")
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
+
+
+
