@@ -1,0 +1,141 @@
+---
+title: "ohh"
+format: html
+runtime: shiny 
+---
+
+```{r}
+#libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(ggplot2)
+
+#data 
+unicef_indicator_2 <- read_csv("unicef_indicator_2.csv")
+```
+```{r}
+ggplot(unicef_indicator_2, aes(x=reorder(country, obs_value), y=obs_value)) +
+  geom_bar(stat="identity", fill="steelblue") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Postnatal Care for Newborns in 2020",
+       x="Country", 
+       y="Percentage of Newborns Receiving Postnatal Care")
+
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country))
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$barplot <- renderPlot({
+                   
+    filtered_data <- subset(unicef_indicator_2, country == input$country)          
+    ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+      geom_bar(stat="identity", fill="steelblue") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title="Postnatal Care for Newborns",
+           x="Country", 
+           y="Percentage of Newborns Receiving Postnatal Care")
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+```{r}
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country))
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$barplot <- renderPlot({
+    filtered_data <- subset(unicef_indicator_2, country == input$country)          
+    ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+      geom_bar(stat="identity", fill="steelblue") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title="Postnatal Care for Newborns",
+           x="Country", 
+           y="Percentage of Newborns Receiving Postnatal Care")
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+```{r}
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country), multiple = TRUE)
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+server <- function(input, output) {
+  output$barplot <- renderPlot({
+    if (length(input$country) > 0) {  # Check if at least one country is selected
+      filtered_data <- unicef_indicator_2[unicef_indicator_2$country %in% input$country, ]
+    } else {
+      filtered_data <- unicef_indicator_2  # If no country is selected, show all data
+    }
+    
+    ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+      geom_bar(stat="identity", fill="steelblue") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title="Postnatal Care for Newborns",
+           x="Country", 
+           y="Percentage of Newborns Receiving Postnatal Care")
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+```{r}
+ui <- fluidPage(
+  titlePanel("Postnatal Care for Newborns"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("country", "Select Country:", choices = unique(unicef_indicator_2$country), multiple = TRUE)
+    ),
+    mainPanel(
+      plotOutput("barplot")
+    )
+  )
+)
+server <- function(input, output) {
+  output$barplot <- renderPlot({
+    if (length(input$country) > 0) {  # Check if at least one country is selected
+      filtered_data <- unicef_indicator_2[unicef_indicator_2$country %in% input$country, ]
+    } else {
+      filtered_data <- unicef_indicator_2  # If no country is selected, show all data
+    }
+    
+    ggplot(filtered_data, aes(x=reorder(country, obs_value), y=obs_value)) +
+      geom_bar(stat="identity", fill="steelblue") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title="Postnatal Care for Newborns",
+           x="Country", 
+           y="Percentage of Newborns Receiving Postnatal Care")
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
+
